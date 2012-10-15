@@ -60,7 +60,8 @@ PRODUCT_COPY_FILES += \
 	$(LOCAL_PATH)/notifications/ogg/Vega.ogg:system/media/audio/notifications/Vega.ogg
 
 # Ringtones
-PRODUCT_COPY_FILES += \
+ifneq ($(CM_BUILD),wingray)
+    PRODUCT_COPY_FILES += \
 	$(LOCAL_PATH)/ringtones/ogg/Acheron.ogg:system/media/audio/ringtones/Acheron.ogg \
 	$(LOCAL_PATH)/ringtones/ogg/Andromeda.ogg:system/media/audio/ringtones/Andromeda.ogg \
 	$(LOCAL_PATH)/ringtones/ogg/Aquila.ogg:system/media/audio/ringtones/Aquila.ogg \
@@ -95,3 +96,4 @@ PRODUCT_COPY_FILES += \
 	$(LOCAL_PATH)/ringtones/ogg/Whisperer.ogg:system/media/audio/ringtones/Whisperer.ogg \
 	$(LOCAL_PATH)/ringtones/ogg/WobblyRinger.ogg:system/media/audio/ringtones/WobblyRinger.ogg \
 	$(LOCAL_PATH)/ringtones/ogg/Zeta.ogg:system/media/audio/ringtones/Zeta.ogg
+endif
