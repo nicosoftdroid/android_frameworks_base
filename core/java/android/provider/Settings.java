@@ -2697,6 +2697,12 @@ public final class Settings {
         public static final String STATUS_BAR_NOTIF_COUNT = "status_bar_notif_count";
 
         /**
+        * Whether Tablet UI is enabled
+        * @hide
+        */
+        public static final String TABLET_UI_ENABLED = "tablet_ui_enabled";
+
+        /**
          * Whether System profiles are enabled
          * @hide
          */

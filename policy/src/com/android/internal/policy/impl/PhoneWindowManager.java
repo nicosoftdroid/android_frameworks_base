@@ -1290,9 +1290,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 * DisplayMetrics.DENSITY_DEFAULT
                 / DisplayMetrics.DENSITY_DEVICE;
 
-        // Force "tablet" UI with a single combined status & navigation bar
-        mHasSystemNavBar = true;
-        mNavigationBarCanMove = false;
+         if (Settings.System.getInt(mContext.getContentResolver(), Settings.System.TABLET_UI_ENABLED, 0) != 0) {
+
+            // Force "tablet" UI with a single combined status & navigation bar
+            mHasSystemNavBar = true;
+            mNavigationBarCanMove = false;
+
+        } else {
+
+            if (shortSizeDp < 600) {
+                // 0-599dp: "phone" UI with a separate status & navigation bar
+                mHasSystemNavBar = false;
+                mNavigationBarCanMove = true;
+            } else {
+                // 600+dp: "phone" UI with modifications for larger screens
+                // User has disabled tablet UI, so use "phablet" regardless of screen size
+                mHasSystemNavBar = false;
+                mNavigationBarCanMove = false;
+            }
+
+        }
 
         if (!mHasSystemNavBar) {
             mHasNavigationBar = mContext.getResources().getBoolean(
