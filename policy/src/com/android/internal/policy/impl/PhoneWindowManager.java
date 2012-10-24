@@ -1293,7 +1293,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 * DisplayMetrics.DENSITY_DEFAULT
                 / DisplayMetrics.DENSITY_DEVICE;
 
-         if (Settings.System.getInt(mContext.getContentResolver(), Settings.System.TABLET_UI_ENABLED, 0) != 0) {
+         if (Settings.System.getInt(mContext.getContentResolver(), Settings.System.TABLET_UI_ENABLED, 1) != 0) {
 
             // Force "tablet" UI with a single combined status & navigation bar
             mHasSystemNavBar = true;
