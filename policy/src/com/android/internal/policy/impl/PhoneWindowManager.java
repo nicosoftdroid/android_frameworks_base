@@ -376,6 +376,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     WindowState mStatusBar = null;
     boolean mHasSystemNavBar;
     int mStatusBarHeight;
+    static int mShortSize = 600;
+    static int mLongSize = 1024;
     WindowState mNavigationBar = null;
     boolean mHasNavigationBar = false;
     boolean mCanHideNavigationBar = false;
@@ -714,6 +716,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.System.KEY_APP_SWITCH_LONG_PRESS_ACTION), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.HARDWARE_KEY_REBINDING), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.EXPANDED_DESKTOP_STATE), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.TABLET_UI_ENABLED), false, this);
             if (SEPARATE_TIMEOUT_FOR_SCREEN_SAVER) {
                 resolver.registerContentObserver(Settings.Secure.getUriFor(
                         "screensaver_timeout"), false, this);
@@ -1329,25 +1335,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 * DisplayMetrics.DENSITY_DEFAULT
                 / DisplayMetrics.DENSITY_DEVICE;
 
-         if (Settings.System.getInt(mContext.getContentResolver(), Settings.System.TABLET_UI_ENABLED, 1) != 0) {
+        boolean tabUIEnabled = (Settings.System.getInt(mContext.getContentResolver(), Settings.System.TABLET_UI_ENABLED, 1) != 0);
 
-            // Force "tablet" UI with a single combined status & navigation bar
+        if (shortSizeDp < 600 && !tabUIEnabled) {
+            // 0-599dp: "phone" UI with a separate status & navigation bar
+            mHasSystemNavBar = false;
+            mNavigationBarCanMove = true;
+        } else if (shortSizeDp < 720 && !tabUIEnabled) {
+            // 600+dp: "phone" UI with modifications for larger screens
+            // User has disabled tablet UI, so use "phablet" regardless of screen size
+            mHasSystemNavBar = false;
+            mNavigationBarCanMove = false;
+        } else {
+            // 720dp: "tablet" UI with a single combined status & navigation bar
             mHasSystemNavBar = true;
             mNavigationBarCanMove = false;
-
-        } else {
-
-            if (shortSizeDp < 600) {
-                // 0-599dp: "phone" UI with a separate status & navigation bar
-                mHasSystemNavBar = false;
-                mNavigationBarCanMove = true;
-            } else {
-                // 600+dp: "phone" UI with modifications for larger screens
-                // User has disabled tablet UI, so use "phablet" regardless of screen size
-                mHasSystemNavBar = false;
-                mNavigationBarCanMove = false;
-            }
-
         }
 
         if (!mHasSystemNavBar) {
@@ -1393,6 +1395,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else {
             mHdmiRotation = mLandscapeRotation;
         }
+
+        mShortSize = shortSize;
+        mLongSize = longSize;
     }
 
     public void updateSettings() {
@@ -1540,6 +1545,67 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         if (updateRotation) {
             updateRotation(true);
+        }
+
+        // SystemUI (status bar) layout policy
+        int shortSizeDp = (mShortSize > 0 ? mShortSize : 600)
+                * DisplayMetrics.DENSITY_DEFAULT
+                / DisplayMetrics.DENSITY_DEVICE;
+
+
+        boolean tabUIEnabled = (Settings.System.getInt(mContext.getContentResolver(), Settings.System.TABLET_UI_ENABLED, 1) != 0);
+
+        if (shortSizeDp < 600 && !tabUIEnabled) {
+            // 0-599dp: "phone" UI with a separate status & navigation bar
+            mHasSystemNavBar = false;
+            mNavigationBarCanMove = true;
+        } else if (shortSizeDp < 720 && !tabUIEnabled) {
+            // 600+dp: "phone" UI with modifications for larger screens
+            // User has disabled tablet UI, so use "phablet" regardless of screen size
+            mHasSystemNavBar = false;
+            mNavigationBarCanMove = false;
+        } else {
+            // 720dp: "tablet" UI with a single combined status & navigation bar
+            mHasSystemNavBar = true;
+            mNavigationBarCanMove = false;
+        }
+
+        if (!mHasSystemNavBar) {
+            mHasNavigationBar = mContext.getResources().getBoolean(
+                    com.android.internal.R.bool.config_showNavigationBar);
+            // Allow a system property to override this. Used by the emulator.
+            // See also hasNavigationBar().
+            String navBarOverride = SystemProperties.get("qemu.hw.mainkeys");
+            if (! "".equals(navBarOverride)) {
+                if      (navBarOverride.equals("1")) mHasNavigationBar = false;
+                else if (navBarOverride.equals("0")) mHasNavigationBar = true;
+            }
+        } else {
+            mHasNavigationBar = false;
+        }
+
+        if (mHasSystemNavBar) {
+            // The system bar is always at the bottom.  If you are watching
+            // a video in landscape, we don't need to hide it if we can still
+            // show a 16:9 aspect ratio with it.
+            int longSizeDp = (mLongSize > 0 ? mLongSize : 1024)
+                    * DisplayMetrics.DENSITY_DEFAULT
+                    / DisplayMetrics.DENSITY_DEVICE;
+            int barHeightDp = mNavigationBarHeightForRotation[mLandscapeRotation]
+                    * DisplayMetrics.DENSITY_DEFAULT
+                    / DisplayMetrics.DENSITY_DEVICE;
+            int aspect = ((shortSizeDp-barHeightDp) * 16) / longSizeDp;
+            // We have computed the aspect ratio with the bar height taken
+            // out to be 16:aspect.  If this is less than 9, then hiding
+            // the navigation bar will provide more useful space for wide
+            // screen movies.
+            mCanHideNavigationBar = aspect < 9;
+        } else if (mHasNavigationBar) {
+            // The navigation bar is at the right in landscape; it seems always
+            // useful to hide it for showing a video.
+            mCanHideNavigationBar = true;
+        } else {
+            mCanHideNavigationBar = false;
         }
     }
 
