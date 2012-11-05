@@ -1337,17 +1337,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         boolean tabUIEnabled = (Settings.System.getInt(mContext.getContentResolver(), Settings.System.TABLET_UI_ENABLED, 1) != 0);
 
-        if (shortSizeDp < 600 && !tabUIEnabled) {
+        if (shortSizeDp < 600 && (!tabUIEnabled)) {
             // 0-599dp: "phone" UI with a separate status & navigation bar
             mHasSystemNavBar = false;
             mNavigationBarCanMove = true;
-        } else if (shortSizeDp < 720 && !tabUIEnabled) {
+        } else if (shortSizeDp < 720 && (!tabUIEnabled)) {
             // 600+dp: "phone" UI with modifications for larger screens
-            // User has disabled tablet UI, so use "phablet" regardless of screen size
+            mHasSystemNavBar = false;
+            mNavigationBarCanMove = false;
+        } else if (!tabUIEnabled) {
+            // 720dp without tablet UI
             mHasSystemNavBar = false;
             mNavigationBarCanMove = false;
         } else {
-            // 720dp: "tablet" UI with a single combined status & navigation bar
+            // "tablet" UI with a single combined status & navigation bar
             mHasSystemNavBar = true;
             mNavigationBarCanMove = false;
         }
@@ -1555,17 +1558,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         boolean tabUIEnabled = (Settings.System.getInt(mContext.getContentResolver(), Settings.System.TABLET_UI_ENABLED, 1) != 0);
 
-        if (shortSizeDp < 600 && !tabUIEnabled) {
+        if (shortSizeDp < 600 && (!tabUIEnabled)) {
             // 0-599dp: "phone" UI with a separate status & navigation bar
             mHasSystemNavBar = false;
             mNavigationBarCanMove = true;
-        } else if (shortSizeDp < 720 && !tabUIEnabled) {
+        } else if (shortSizeDp < 720 && (!tabUIEnabled)) {
             // 600+dp: "phone" UI with modifications for larger screens
             // User has disabled tablet UI, so use "phablet" regardless of screen size
             mHasSystemNavBar = false;
             mNavigationBarCanMove = false;
+        } else if (!tabUIEnabled) {
+            // 720dp without tablet UI
+            mHasSystemNavBar = false;
+            mNavigationBarCanMove = false;
         } else {
-            // 720dp: "tablet" UI with a single combined status & navigation bar
+            // "tablet" UI with a single combined status & navigation bar
             mHasSystemNavBar = true;
             mNavigationBarCanMove = false;
         }
