@@ -47,6 +47,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.provider.Settings;
 
 import com.android.internal.util.XmlUtils;
 
@@ -679,8 +680,8 @@ public abstract class PreferenceActivity extends ListActivity implements
      * enough.
      */
     public boolean onIsMultiPane() {
-        boolean preferMultiPane = getResources().getBoolean(
-                com.android.internal.R.bool.preferences_prefer_dual_pane);
+        boolean preferMultiPane = (Settings.System.getInt(getContentResolver(),
+            Settings.System.TABLET_APPS_ENABLED, 1) == 1);
         return preferMultiPane;
     }
 

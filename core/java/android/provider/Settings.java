@@ -2735,6 +2735,12 @@ public final class Settings {
         public static final String TABLET_UI_ENABLED = "tablet_ui_enabled";
 
         /**
+        * Whether Tablet Apps are enabled
+        * @hide
+        */
+        public static final String TABLET_APPS_ENABLED = "tablet_apps_enabled";
+
+        /**
          * Whether System profiles are enabled
          * @hide
          */
