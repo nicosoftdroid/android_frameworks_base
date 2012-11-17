@@ -507,36 +507,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             mClearRecents.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    new Thread(new Runnable(){
-                        public void run(){
-                            if(mScrollView instanceof ScrollView){
-                                ((ScrollView) mScrollView).smoothScrollTo(0,0);
-                            } else if(mScrollView instanceof HorizontalScrollView) {
-                                ((HorizontalScrollView) mScrollView).smoothScrollTo(0,0);
-                            }
-
-                            try{
-                                for (final View child : mViewContainer){
-                                    mTaskHandler.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            mRecentsContainer.removeViewInLayout(child);
-                                        }
-                                    });
-
-                                    // Add a small delay before of removing next app
-                                    Thread.sleep(150);
-                                }
-                            } catch (ConcurrentModificationException e){
-                                // User pressed back key before animation finished. This is not
-                                // such a good idea, and we can't deal with it on any other way,
-                                // so we just interrupt the process instead of crashing.
-                            } catch (InterruptedException ie){
-                                // User will see the app fading instantly after the previous
-                                // one. This will probably never happen
-                            }
-                        }
-                    }).start();
+                    mRecentsContainer.removeAllViewsInLayout();
                 }
             });
         }
